@@ -17,13 +17,21 @@ public class LibCEC {
     private LibCEC() {
     };
 	
-    public static LibCEC initialize() {
+    public static LibCEC initialize(boolean loggingOn) {
         if (!initialized) {
             instance = new LibCEC();
-            instance.init();
+            instance.init(loggingOn);
             initialized = true;
         }
         return instance;
+    }
+
+    public static void cleanUp() {
+        if (initialized) {
+            instance.close();
+            instance.dispose();
+            initialized = false;
+        }
     }
 
     public boolean isTVOn() {
@@ -43,7 +51,7 @@ public class LibCEC {
     }
 
     //initializes native c++ LibCEC object with default configuration
-    private native void init();
+    private native void init(boolean loggingOn);
 
     //opens connection to adapter, pass name of com port for adapter
     public native boolean open(String port);
@@ -57,6 +65,10 @@ public class LibCEC {
     //calls default c++ function for powerOnDevice which will power on TV
     public native boolean powerOnTV();
 
+    public native boolean powerOffDevice(int address);
+
+    public native boolean powerOffTV();
+
     //returns array containing logical addresses of active devices detected by LibCEC
     public native int[] getActiveDevices();
 
@@ -67,8 +79,21 @@ public class LibCEC {
     public native int getDevicePowerStatus(int address);
 
     //close connection to LibCEC adapter
-    public native void close();
+    private native void close();
 
     //call to handle cleanup of native c++ resources
-    public native void dispose();
+    private native void dispose();
+
+    public native boolean sendKeyPress(int address, int controlCode);
+
+    public native boolean sendKeyRelease(int address);
+
+    public native boolean isActiveDevice(int address);
+
+    public native boolean isActiveDeviceType(int deviceType);
+
+    public native int sendVolumeUp();
+
+    public native int sendVolumeDown();
+    
 }

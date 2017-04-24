@@ -2,7 +2,7 @@
  * CECInterface.cpp
  *
  *  Created on: Mar 26, 2017
- *      Author: mattashley
+ *      Author: Matt
  */
 
 #include <cec.h>
@@ -11,20 +11,27 @@
 #include "handle.h"
 
 JNIEXPORT void JNICALL Java_cec_LibCEC_init
-  (JNIEnv * env, jobject obj)
+  (JNIEnv * env, jobject obj, jboolean loggingOn)
 {
-	  CEC::libcec_configuration *config = new CEC::libcec_configuration();
+    CEC::libcec_configuration* config = new CEC::libcec_configuration();
+    CEC::ICECCallbacks* callbacks = new CEC::ICECCallbacks();
 
-	  config->Clear();
-	  snprintf(config->strDeviceName, 13, "RaspberryPi");
-	  config->clientVersion       = CEC::LIBCEC_VERSION_CURRENT;
-	  config->bActivateSource     = 0;
+    config->Clear();
+    snprintf(config->strDeviceName, 13, "RaspberryPi");
+    config->clientVersion       = CEC::LIBCEC_VERSION_CURRENT;
+    config->bActivateSource     = 0;
+    config->deviceTypes.Add(CEC::CEC_DEVICE_TYPE_RECORDING_DEVICE);
 
-	  config->deviceTypes.Add(CEC::CEC_DEVICE_TYPE_RECORDING_DEVICE);
+    if (loggingOn)
+    {
+        CEC::ICECCallbacks* callbacks = new CEC::ICECCallbacks();
+        callbacks->logMessage = &CecLogMessage;
+        config->callbacks = callbacks;
+    }
 
-	  CEC::ICECAdapter* adapter = (CEC::ICECAdapter *) CECInitialise(config);
-          adapter->InitVideoStandalone();
-	  setHandle(env, obj, adapter);
+    CEC::ICECAdapter* adapter = (CEC::ICECAdapter *) CECInitialise(config);
+    adapter->InitVideoStandalone();
+    setHandle(env, obj, adapter);
 
 }
 
@@ -86,6 +93,25 @@ JNIEXPORT jboolean JNICALL Java_cec_LibCEC_powerOnTV
 
 }
 
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_powerOffDevice
+  (JNIEnv * env, jobject obj, jint address)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    bool result = adapter->StandbyDevices((CEC::cec_logical_address)address);
+
+    return result ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_powerOffTV
+  (JNIEnv * env, jobject obj)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    bool result = adapter->StandbyDevices(CEC::CECDEVICE_TV);
+
+    return result ? JNI_TRUE : JNI_FALSE;
+
+}
+
 JNIEXPORT jintArray JNICALL Java_cec_LibCEC_getActiveDevices
   (JNIEnv * env, jobject obj)
 {
@@ -129,4 +155,49 @@ JNIEXPORT void JNICALL Java_cec_LibCEC_dispose
     delete adapter;
 }
 
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_sendKeyPress
+  (JNIEnv *env, jobject obj, jint address, jint controlCode)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    return adapter->SendKeypress((CEC::cec_logical_address)address,(CEC::cec_user_control_code)controlCode,true);
+}
 
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_sendKeyRelease
+  (JNIEnv *env, jobject obj, jint address)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    return adapter->SendKeyRelease((CEC::cec_logical_address)address,true);
+}
+
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_isActiveDevice
+  (JNIEnv *env, jobject obj, jint address)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    return adapter->IsActiveDevice((CEC::cec_logical_address)address);
+}
+
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_isActiveDeviceType
+  (JNIEnv *env, jobject obj, jint type)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    return adapter->IsActiveDeviceType((CEC::cec_device_type)type);
+}
+
+JNIEXPORT jint JNICALL Java_cec_LibCEC_sendVolumeUp
+  (JNIEnv *env, jobject obj)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    return adapter->VolumeUp(true);
+}
+
+JNIEXPORT jint JNICALL Java_cec_LibCEC_sendVolumeDown
+  (JNIEnv *env, jobject obj)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    return adapter->VolumeDown(true);
+}
+
+void CecLogMessage(void* UNUSED, const CEC::cec_log_message* message)
+{
+puts(message->message);
+}

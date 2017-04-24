@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     cec_LibCEC
  * Method:    init
- * Signature: ()V
+ * Signature: (Z)V
  */
 JNIEXPORT void JNICALL Java_cec_LibCEC_init
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jboolean);
 
 /*
  * Class:     cec_LibCEC
@@ -45,6 +45,22 @@ JNIEXPORT jboolean JNICALL Java_cec_LibCEC_powerOnDevice
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_cec_LibCEC_powerOnTV
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    powerOffDevice
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_powerOffDevice
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    powerOffTV
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_powerOffTV
   (JNIEnv *, jobject);
 
 /*
@@ -86,6 +102,56 @@ JNIEXPORT void JNICALL Java_cec_LibCEC_close
  */
 JNIEXPORT void JNICALL Java_cec_LibCEC_dispose
    (JNIEnv *, jobject);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    sendKeyPress
+ * Signature: (II)Z
+ */
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_sendKeyPress
+  (JNIEnv *, jobject, jint, jint);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    sendKeyRelease
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_sendKeyRelease
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    isActiveDevice
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_isActiveDevice
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    isActiveDeviceType
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_cec_LibCEC_isActiveDeviceType
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    sendVolumeUp
+ * Signature: ()Z
+ */
+JNIEXPORT jint JNICALL Java_cec_LibCEC_sendVolumeUp
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    sendVolumeDown
+ * Signature: ()Z
+ */
+JNIEXPORT jint JNICALL Java_cec_LibCEC_sendVolumeDown
+  (JNIEnv *, jobject);
+
+void CecLogMessage(void* cbParam, const CEC::cec_log_message* message);
 
 #ifdef __cplusplus
 }
