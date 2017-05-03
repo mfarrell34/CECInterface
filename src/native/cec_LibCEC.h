@@ -138,7 +138,7 @@ JNIEXPORT jboolean JNICALL Java_cec_LibCEC_isActiveDeviceType
 /*
  * Class:     cec_LibCEC
  * Method:    sendVolumeUp
- * Signature: ()Z
+ * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_cec_LibCEC_sendVolumeUp
   (JNIEnv *, jobject);
@@ -146,9 +146,25 @@ JNIEXPORT jint JNICALL Java_cec_LibCEC_sendVolumeUp
 /*
  * Class:     cec_LibCEC
  * Method:    sendVolumeDown
- * Signature: ()Z
+ * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_cec_LibCEC_sendVolumeDown
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    enableLogging
+ * Signature: ()
+ */
+JNIEXPORT void JNICALL Java_cec_LibCEC_enableLogging
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     cec_LibCEC
+ * Method:    disableLogging
+ * Signature: ()
+ */
+JNIEXPORT void JNICALL Java_cec_LibCEC_disableLogging
   (JNIEnv *, jobject);
 
 void CecLogMessage(void* cbParam, const CEC::cec_log_message* message);

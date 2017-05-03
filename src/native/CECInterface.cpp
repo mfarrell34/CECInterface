@@ -13,23 +13,24 @@
 JNIEXPORT void JNICALL Java_cec_LibCEC_init
   (JNIEnv * env, jobject obj, jboolean loggingOn)
 {
-    CEC::libcec_configuration* config = new CEC::libcec_configuration();
-    CEC::ICECCallbacks* callbacks = new CEC::ICECCallbacks();
+    CEC::libcec_configuration config;
+    CEC::ICECCallbacks callbacks;
 
-    config->Clear();
-    snprintf(config->strDeviceName, 13, "RaspberryPi");
-    config->clientVersion       = CEC::LIBCEC_VERSION_CURRENT;
-    config->bActivateSource     = 0;
-    config->deviceTypes.Add(CEC::CEC_DEVICE_TYPE_RECORDING_DEVICE);
+    callbacks.Clear();
+    config.Clear();
+    snprintf(config.strDeviceName, 13, "RaspberryPi");
+    config.clientVersion       = CEC::LIBCEC_VERSION_CURRENT;
+    config.bActivateSource     = 0;
+    config.deviceTypes.Add(CEC::CEC_DEVICE_TYPE_RECORDING_DEVICE);
 
     if (loggingOn)
     {
-        CEC::ICECCallbacks* callbacks = new CEC::ICECCallbacks();
-        callbacks->logMessage = &CecLogMessage;
-        config->callbacks = callbacks;
+        callbacks.logMessage = &CecLogMessage;
     }
 
-    CEC::ICECAdapter* adapter = (CEC::ICECAdapter *) CECInitialise(config);
+    config.callbacks = &callbacks;
+
+    CEC::ICECAdapter* adapter = (CEC::ICECAdapter *) CECInitialise(&config);
     adapter->InitVideoStandalone();
     setHandle(env, obj, adapter);
 
@@ -195,6 +196,43 @@ JNIEXPORT jint JNICALL Java_cec_LibCEC_sendVolumeDown
 {
     CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
     return adapter->VolumeDown(true);
+}
+
+JNIEXPORT void JNICALL Java_cec_LibCEC_enableLogging
+  (JNIEnv *env, jobject obj)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    CEC::libcec_configuration config;
+    if (adapter->GetCurrentConfiguration(&config))
+    {
+        if(!config.callbacks || !config.callbacks->logMessage)
+        {
+            //this will have to be updated in future if other callbacks are
+            //used but for now logging is only callback I'm using
+            CEC::ICECCallbacks callbacks;
+            callbacks.Clear();
+    	    callbacks.logMessage = &CecLogMessage;
+            config.callbacks = &callbacks;
+            adapter->SetConfiguration(&config);
+        }
+    }
+}
+
+JNIEXPORT void JNICALL Java_cec_LibCEC_disableLogging
+  (JNIEnv *env, jobject obj)
+{
+    CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
+    CEC::libcec_configuration config;
+    if (adapter->GetCurrentConfiguration(&config))
+    {
+        if(config.callbacks && config.callbacks->logMessage)
+        {
+            CEC::ICECCallbacks callbacks;
+            callbacks.Clear();
+            config.callbacks = &callbacks;
+            adapter->SetConfiguration(&config);
+        }
+    }
 }
 
 void CecLogMessage(void* UNUSED, const CEC::cec_log_message* message)

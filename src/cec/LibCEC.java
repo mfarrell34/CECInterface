@@ -95,5 +95,10 @@ public class LibCEC {
     public native int sendVolumeUp();
 
     public native int sendVolumeDown();
-    
+
+    //disables logging if currently enabled, otherwise does nothing
+    public native void enableLogging();
+
+    //enables logging to stdout if currently disabled, otherwise does nothing
+    public native void disableLogging(); 
 }
