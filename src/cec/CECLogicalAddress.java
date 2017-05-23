@@ -44,5 +44,9 @@ public enum CECLogicalAddress {
         }
         return address;
     }
+
+    public int getValue() {
+        return address;
+    }
 }
 

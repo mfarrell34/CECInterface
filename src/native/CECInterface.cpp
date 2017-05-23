@@ -13,24 +13,24 @@
 JNIEXPORT void JNICALL Java_cec_LibCEC_init
   (JNIEnv * env, jobject obj, jboolean loggingOn)
 {
-    CEC::libcec_configuration config;
-    CEC::ICECCallbacks callbacks;
+    CEC::libcec_configuration* config = new CEC::libcec_configuration();
+    CEC::ICECCallbacks* callbacks = new CEC::ICECCallbacks();
 
-    callbacks.Clear();
-    config.Clear();
-    snprintf(config.strDeviceName, 13, "RaspberryPi");
-    config.clientVersion       = CEC::LIBCEC_VERSION_CURRENT;
-    config.bActivateSource     = 0;
-    config.deviceTypes.Add(CEC::CEC_DEVICE_TYPE_RECORDING_DEVICE);
+    callbacks->Clear();
+    config->Clear();
+    snprintf(config->strDeviceName, 13, "RaspberryPi");
+    config->clientVersion       = CEC::LIBCEC_VERSION_CURRENT;
+    config->bActivateSource     = 0;
+    config->deviceTypes.Add(CEC::CEC_DEVICE_TYPE_RECORDING_DEVICE);
 
-    if (loggingOn)
+     if (loggingOn)
     {
-        callbacks.logMessage = &CecLogMessage;
+        callbacks->logMessage = &CecLogMessage;
     }
 
-    config.callbacks = &callbacks;
+    config->callbacks = callbacks;
 
-    CEC::ICECAdapter* adapter = (CEC::ICECAdapter *) CECInitialise(&config);
+    CEC::ICECAdapter* adapter = (CEC::ICECAdapter *) CECInitialise(config);
     adapter->InitVideoStandalone();
     setHandle(env, obj, adapter);
 
@@ -154,6 +154,7 @@ JNIEXPORT void JNICALL Java_cec_LibCEC_dispose
 {
     CEC::ICECAdapter *adapter = getHandle<CEC::ICECAdapter>(env, obj);
     delete adapter;
+    setHandle(env, obj, (CEC::ICECAdapter*)NULL);    
 }
 
 JNIEXPORT jboolean JNICALL Java_cec_LibCEC_sendKeyPress
