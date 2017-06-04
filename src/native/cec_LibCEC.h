@@ -4,6 +4,70 @@
 
 #ifndef _Included_cec_LibCEC
 #define _Included_cec_LibCEC
+
+#include <cec.h>
+#include <stdlib.h>
+#include <iostream>
+
+void LogMessage(void* UNUSED, const CEC::cec_log_message* message)
+{
+    std::cout << message->message << "\n";
+}
+
+class CECInterface {
+
+    CEC::libcec_configuration* config;
+    CEC::ICECCallbacks* callbacks;
+    CEC::ICECAdapter* adapter;
+
+public:
+    CECInterface()
+    {
+        config = new CEC::libcec_configuration();
+        callbacks = new CEC::ICECCallbacks();
+    }
+    ~CECInterface()
+    {
+        delete callbacks;
+        delete config;
+        if (adapter)
+        {
+            CECDestroy(adapter);
+        }
+    }
+    CEC::libcec_configuration* get_config(void)
+    {
+        return config;
+    }
+    CEC::ICECCallbacks* get_callbacks(void)
+    {
+        return callbacks;
+    }
+    CEC::ICECAdapter* get_adapter(void)
+    {
+        return adapter;
+    }
+    void setup_adapter(bool loggingOn)
+    {
+        callbacks->Clear();
+        config->Clear();
+        snprintf(config->strDeviceName, 13, "RaspberryPi");
+        config->clientVersion       = CEC::LIBCEC_VERSION_CURRENT;
+        config->bActivateSource     = 0;
+        config->deviceTypes.Add(CEC::CEC_DEVICE_TYPE_RECORDING_DEVICE);
+
+        if (loggingOn)
+        {
+            callbacks->logMessage = &LogMessage;
+        }
+
+        config->callbacks = callbacks;
+
+        adapter = (CEC::ICECAdapter *) CECInitialise(config);
+        adapter->InitVideoStandalone();
+    }
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -166,8 +230,6 @@ JNIEXPORT void JNICALL Java_cec_LibCEC_enableLogging
  */
 JNIEXPORT void JNICALL Java_cec_LibCEC_disableLogging
   (JNIEnv *, jobject);
-
-void CecLogMessage(void* cbParam, const CEC::cec_log_message* message);
 
 #ifdef __cplusplus
 }
